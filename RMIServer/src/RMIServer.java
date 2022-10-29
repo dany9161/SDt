@@ -6,7 +6,7 @@ public class RMIServer {
     public static void main(String[] args) {
 
         Registry r = null;
-        PlaceManager placeList;
+        FileManager fileList;
         try{
             r = LocateRegistry.createRegistry(2022);
         }catch(RemoteException a){
@@ -14,8 +14,8 @@ public class RMIServer {
         }
 
         try{
-             placeList = new PlaceManager();
-            r.rebind("placelist", placeList );
+            fileList = new FileManager();
+            r.rebind("filelist", fileList );
 
             System.out.println("Place server ready");
         }catch(Exception e) {
