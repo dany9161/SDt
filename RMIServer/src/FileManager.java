@@ -26,10 +26,23 @@ public class FileManager extends UnicastRemoteObject implements FileManagerInter
     protected FileManager() throws RemoteException {
         filesTable=new HashMap<>();
         objF = new File("./files/");
-        deleteDirectory(objF);
+        //deleteDirectory(objF);
         objF.mkdirs();
         if(objF.exists())
             System.out.println("Pasta pronta");
+    }
+
+    private File getFile(String fileName) throws IOException {
+        String n = fileName.split("\\.")[0];
+        File serverpathfile= new File("./files/"+n+ ".txt");
+        int increase=1;
+        while(serverpathfile.exists()){
+            increase++;
+            serverpathfile = new File("./files/" + n + increase + ".txt");
+        }
+        if (!serverpathfile.exists()) serverpathfile.createNewFile();
+
+        return serverpathfile;
     }
 
 
@@ -37,7 +50,9 @@ public class FileManager extends UnicastRemoteObject implements FileManagerInter
     public UUID uploadFileToServer(byte[] mydata, String fileName , int length) throws RemoteException {
         UUID uuid;
         try {
-            File serverpathfile = new File("./files/"+fileName);
+
+            File serverpathfile = getFile(fileName);
+
             FileOutputStream out=new FileOutputStream(serverpathfile);
             byte [] data=mydata;
 
