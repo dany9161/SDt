@@ -28,7 +28,7 @@ public class RMIClient {
             in.close();
 
             System.out.println("uploading to server...");
-            fileUuid = fileServer.uploadFileToServer(mydata, fileName,(int) objF.length());
+            fileUuid = fileServer.uploadFileToServer(mydata, (int) objF.length());
 
             if (fileUuid != null)
                 System.out.println("File UUID: "+fileUuid);

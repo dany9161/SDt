@@ -1,15 +1,17 @@
 import java.util.UUID;
 
 public class Pedido {
-    char status;
-    String scriptPath;
-    UUID fileUUID;
+    private String status;
+    private String scriptPath;
+    private UUID fileUUID;
+    private UUID pedidoId;
 
-    public Pedido(String scriptPath, UUID fileUUID) {
-        this.scriptPath = scriptPath;
-        this.fileUUID = fileUUID;
+    public Pedido(String _scriptPath, UUID _fileUUID,UUID _pedidoId) {
+        scriptPath = _scriptPath;
+        fileUUID = _fileUUID;
+        pedidoId=_pedidoId;
         //Quando um processo é criado, fica em pending
-        status='P';
+        status="Waiting";
     }
 
     public String getScriptPath() {
@@ -21,10 +23,16 @@ public class Pedido {
     }
 
     public void setStatusRunning(){
-        this.status = 'R';
+        this.status = "Running";
+    }
+    public void setStatusSaving(){
+        this.status = "Saving";
+    }
+    public void setStatusDone(){
+        this.status = "Done";
     }
 
-    public void setStatusOver(){
-        this.status = 'O';
-    }
+    public String getStatus() {return status;}
+
+    public UUID getPedidoId() {return pedidoId;}
 }

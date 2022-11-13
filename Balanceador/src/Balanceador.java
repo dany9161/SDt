@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -17,9 +18,14 @@ public class Balanceador extends UnicastRemoteObject implements BalanceadorInter
     public List<Object> submetepedido(String filePath, UUID ficheiro) throws MalformedURLException, NotBoundException, RemoteException {
         int processador = getBestProcessador();
         String pUrl = processadores.get(processador).url;
-        ProcessorInterface processor2024  = (ProcessorInterface) Naming.lookup(pUrl);
+        ProcessorInterface processor2024 = (ProcessorInterface) Naming.lookup(pUrl);
         //submete e recebe o uuid do pedido
-        UUID pedidoId = processor2024.submetePedido(filePath,ficheiro);
+        UUID pedidoId = null;
+        try {
+            pedidoId = processor2024.submetePedido(filePath,ficheiro);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         return Arrays.asList(processadores.get(processador).url, pedidoId);
     }
@@ -29,6 +35,7 @@ public class Balanceador extends UnicastRemoteObject implements BalanceadorInter
     }
 
     //encontrar o processador com mais recursos
+    //devolver o endereço
     public int getBestProcessador(){
         //algoritmo para achar processador com mais recursos
         return 2024;

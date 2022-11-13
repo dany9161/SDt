@@ -1,0 +1,3 @@
+
+C:\Users\hugon\Documents\GitHub\SDt\Processador>echo ola ola 
+ola ola

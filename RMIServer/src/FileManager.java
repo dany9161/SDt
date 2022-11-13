@@ -9,22 +9,10 @@ import java.util.UUID;
 
 public class FileManager extends UnicastRemoteObject implements FileManagerInterface, Serializable {
     private static final long serialVersionUID = 1L;
-    private static HashMap<UUID,String> filesTable;
 
     private File objF;
 
-    static boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        return directoryToBeDeleted.delete();
-    }
-
     protected FileManager() throws RemoteException {
-        filesTable=new HashMap<>();
         objF = new File("./files/");
         //deleteDirectory(objF);
         objF.mkdirs();
@@ -32,45 +20,41 @@ public class FileManager extends UnicastRemoteObject implements FileManagerInter
             System.out.println("Pasta pronta");
     }
 
-    private File getFile(String fileName) throws IOException {
-        String n = fileName.split("\\.")[0];
-        File serverpathfile= new File("./files/"+n+ ".txt");
-        int increase=1;
-        while(serverpathfile.exists()){
-            increase++;
-            serverpathfile = new File("./files/" + n + increase + ".txt");
-        }
-        if (!serverpathfile.exists()) serverpathfile.createNewFile();
-
-        return serverpathfile;
-    }
-
 
     @Override
-    public UUID uploadFileToServer(byte[] mydata, String fileName , int length) throws RemoteException {
+    public UUID uploadFileToServer(byte[] mydata, int length) throws RemoteException {
         UUID uuid;
+        uuid= UUID.nameUUIDFromBytes(mydata);
+
+        if (saveFile(mydata,"./files/"+uuid+".txt",length))
+            return uuid;
+        else
+            return null;
+    }
+
+    @Override
+    public void uploadResFile(byte[] mybyte, String filename, int length) throws RemoteException {
+        saveFile(mybyte, filename, length);
+    }
+
+    private boolean saveFile(byte[] mydata, String filename,int length){
         try {
-
-            File serverpathfile = getFile(fileName);
-
+            File serverpathfile = new File(filename);
             FileOutputStream out=new FileOutputStream(serverpathfile);
-            byte [] data=mydata;
 
-            out.write(data);
+            out.write(mydata);
             out.flush();
             out.close();
-
-             uuid= UUID.nameUUIDFromBytes(mydata);
-
-            filesTable.put(uuid,fileName);
-            return uuid;
-
+            return true;
         } catch (IOException e) {
-
             e.printStackTrace();
         }
+        return false;
+    }
 
-        System.out.println("Done writing data...");
-        return null;
+    @Override
+    public String getFilePath(String fileName) throws RemoteException {
+        File f = new File("./files/"+fileName+".txt");
+        return f.getAbsolutePath();
     }
 }
