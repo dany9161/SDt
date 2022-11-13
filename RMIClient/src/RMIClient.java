@@ -14,6 +14,8 @@ public class RMIClient {
     public static void main(String[] args) throws IOException {
         UUID fileUuid;
         String fileName = "myfile.txt";
+
+
         try{
             //Sprint 1
             Registry storage = LocateRegistry.getRegistry("localhost", 2022);
