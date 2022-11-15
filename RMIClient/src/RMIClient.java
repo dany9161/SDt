@@ -54,7 +54,7 @@ public class RMIClient {
             //CLIENTE recebe o estado do pedido
             ProcessorInterface processor = (ProcessorInterface) Naming.lookup(urlProcessador);
             System.out.println("Encontrei o processador");
-            char status = processor.getEstado(pedidoId);
+            String status = processor.getEstado(pedidoId);
 
             System.out.println("Estado do pedido " +pedidoId+ " no servidor " +urlProcessador+" é "+status);
 

@@ -39,9 +39,9 @@ public class Processor extends UnicastRemoteObject implements ProcessorInterface
         try {
             pb.start();
 
-
+            p.setStatusRunning();
             //envia o ficheiro para o server
-
+            p.setStatusSaving();
             // Creating an OutputStream
             byte [] mydata=new byte[(int) resFile.length()];
             FileInputStream in=new FileInputStream(resFile);
@@ -51,13 +51,12 @@ public class Processor extends UnicastRemoteObject implements ProcessorInterface
             in.close();
 
             server.uploadResFile(mydata,p.getPedidoId()+".txt",(int) resFile.length());
+            p.setStatusDone();
         } catch (IOException e) {
             e.printStackTrace();
 
         }
-
-
-
+        System.out.println("Olaaaa");
         return p.getPedidoId();
     }
 

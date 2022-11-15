@@ -1,0 +1,3 @@
+
+C:\Users\iurfa\Desktop\SDT\SDt\Processador>echo ola ola 
+ola ola
