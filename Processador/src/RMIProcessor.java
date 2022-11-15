@@ -5,11 +5,11 @@ import java.rmi.registry.Registry;
 public class RMIProcessor {
 
     public static void main(String[] args) {
-
+      int port = Integer.parseInt(args[0]);
         Registry r;
         Processor p;
         try{
-            r = LocateRegistry.createRegistry(2024);
+            r = LocateRegistry.createRegistry(port);
             p = new Processor();
             r.rebind("processor",p);
         }catch(RemoteException a){

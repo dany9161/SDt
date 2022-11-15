@@ -25,38 +25,36 @@ public class Processor extends UnicastRemoteObject implements ProcessorInterface
         estadoPedido.put(p.getPedidoId(),p);
 
         //vai buscar o ficheiro
-            //abre a conecção ao server
+
         FileManagerInterface server = (FileManagerInterface) Naming.lookup("rmi://localhost:2022/filelist");
-        String filePath = server.getFilePath(ficheiro.toString());
+        String filePath = server.getFilePath(ficheiro.toString()); ////abre a conecção ao server
 
         //executa o script
-        ProcessBuilder pb = new ProcessBuilder(path);
-        Map<String, String> env = pb.environment();
+        ProcessBuilder pb = new ProcessBuilder(path); // proces builder executar comandos
+        Map<String, String> env = pb.environment(); // poder enviar ficheiro para onde está script
         env.put("file", filePath);
-        File resFile = new File(p.getPedidoId()+".txt");
+        File resFile = new File(p.getPedidoId()+".txt"); //ficheiro resultado
         pb.redirectErrorStream(true);
         pb.redirectOutput(ProcessBuilder.Redirect.appendTo(resFile));
         try {
-            pb.start();
+            pb.start(); //iniciar
 
-            p.setStatusRunning();
+            p.setStatusRunning(); // estadomudar
             //envia o ficheiro para o server
             p.setStatusSaving();
             // Creating an OutputStream
             byte [] mydata=new byte[(int) resFile.length()];
-            FileInputStream in=new FileInputStream(resFile);
-
+            FileInputStream in=new FileInputStream(resFile); // peparar ficheiro para enviar para server
 
             in.read(mydata, 0, mydata.length);
             in.close();
 
-            server.uploadResFile(mydata,p.getPedidoId()+".txt",(int) resFile.length());
+            server.uploadResFile(mydata,p.getPedidoId()+".txt",(int) resFile.length()); //mandar para o server
             p.setStatusDone();
         } catch (IOException e) {
             e.printStackTrace();
 
         }
-        System.out.println("Olaaaa");
         return p.getPedidoId();
     }
 
@@ -65,6 +63,7 @@ public class Processor extends UnicastRemoteObject implements ProcessorInterface
         if(!estadoPedido.containsKey(idPedido)) {//se o pedido não existir
             System.out.println("O processo " + idPedido + " não existe");
             return "Z";
+            //cliente vem buscar o estado
         }
 
         return estadoPedido.get(idPedido).getStatus();

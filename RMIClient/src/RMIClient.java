@@ -15,7 +15,20 @@ public class RMIClient {
         UUID fileUuid;
         String fileName = "myfile.txt";
 
+        Thread t = (new Thread() {
+            public void run() {
+                RMIProcessor.main(new String[]{"2024"});
+                RMIBalanceador.main(new String[0]);
+                RMIServer.main(new String[0]);
 
+            }
+        });
+        t.start();
+        try {
+            Thread.sleep(1000); // garante que todos os serviços estão disponíveis antes
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         try{
             //Sprint 1
             Registry storage = LocateRegistry.getRegistry("localhost", 2022);
