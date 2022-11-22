@@ -30,13 +30,12 @@ public class FileManager extends UnicastRemoteObject implements FileManagerInter
             return uuid;
         else
             return null;
-        // retornada o id do ficheiro
     }
 
     @Override
     public void uploadResFile(byte[] mybyte, String filename, int length) throws RemoteException {
         saveFile(mybyte, filename, length);
-    } //envia os parametros do save file
+    }
 
     private boolean saveFile(byte[] mydata, String filename,int length){
         try {
@@ -52,7 +51,6 @@ public class FileManager extends UnicastRemoteObject implements FileManagerInter
         }
         return false;
     }
-    //Guarda o ficheiro
 
     @Override
     public String getFilePath(String fileName) throws RemoteException {

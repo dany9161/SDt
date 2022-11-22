@@ -7,7 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 public class Balanceador extends UnicastRemoteObject implements BalanceadorInterface{
-    static HashMap<Integer,Processador> processadores;
+    static HashMap<String, Integer> processadores;
 
     public Balanceador() throws RemoteException {
         super();
@@ -16,28 +16,31 @@ public class Balanceador extends UnicastRemoteObject implements BalanceadorInter
 
     @Override
     public List<Object> submetepedido(String filePath, UUID ficheiro) throws MalformedURLException, NotBoundException, RemoteException {
-        int processador = getBestProcessador();
-        String pUrl = processadores.get(processador).url;
-        ProcessorInterface processor2024 = (ProcessorInterface) Naming.lookup(pUrl);
+        String processador = getBestProcessador();
+        //String pUrl = processadores.get(processador);
+        ProcessorInterface processor = (ProcessorInterface) Naming.lookup(processador);
         //submete e recebe o uuid do pedido
         UUID pedidoId = null;
         try {
-            pedidoId = processor2024.submetePedido(filePath,ficheiro);
+            pedidoId = processor.submetePedido(filePath,ficheiro);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        return Arrays.asList(processadores.get(processador).url, pedidoId);
+        return Arrays.asList(processador, pedidoId);
     }
 
-    public void addProcessador (int port, Processador p){
-        processadores.put(port,p);
+    public void addProcessador (String address, int pedidos){
+        processadores.put(address,pedidos);
     }
 
+    public void updateProcessor(String address, int pedidos){addProcessador (address,pedidos);}
     //encontrar o processador com mais recursos
     //devolver o endereço
-    public int getBestProcessador(){
-        //algoritmo para achar processador com mais recursos
-        return 2024;
+    public String getBestProcessador(){
+        //devolve o endereço do processador que tem menos pedidos em espera
+        Map.Entry<String, Integer> min = Collections.min(processadores.entrySet(),
+                Comparator.comparing(Map.Entry::getValue));
+        return min.getKey();
     }
 }
