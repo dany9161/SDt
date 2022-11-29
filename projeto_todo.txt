@@ -1,0 +1,3 @@
+concurrent hashmap ou sync nos metodos
+mudar a metrica (numero de threads a correr)
+tirar os pedidos quando acabam
