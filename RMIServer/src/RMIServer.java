@@ -4,7 +4,7 @@ import java.rmi.registry.Registry;
 
 public class RMIServer {
     public static void main(String[] args) {
-
+//int port = Integer.parseInt(args[0]);
         Registry r;
         FileManager fileList;
         try{

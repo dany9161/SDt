@@ -1,60 +1,49 @@
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Processor extends UnicastRemoteObject implements ProcessorInterface {
     static HashMap<UUID, Pedido> estadoPedido;
 
-    public Processor() throws RemoteException {
+    public Processor(int _port) throws RemoteException {
         super();
         estadoPedido = new HashMap();
+
+        Runnable sendHeartbeatRunnable = new Runnable() {
+            public void run() {
+                MulticastPublisher mp = new MulticastPublisher();
+                try {
+                    mp.multicast("rmi://localhost:"+_port+"/processor;"+getPedidosWaiting());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(sendHeartbeatRunnable, 0, 3, TimeUnit.SECONDS);
+    }
+
+    private int getPedidosWaiting() {
+        return (int) estadoPedido.entrySet().stream().filter(Pedido -> Pedido.getValue().getStatus().contains("Waiting")).count();
     }
 
     @Override
     public UUID submetePedido(String path, UUID ficheiro) throws RemoteException, MalformedURLException, NotBoundException, FileNotFoundException {
+
         Pedido p = new Pedido(path,ficheiro,UUID.randomUUID());
         estadoPedido.put(p.getPedidoId(),p);
-
-        //vai buscar o ficheiro
-
-        FileManagerInterface server = (FileManagerInterface) Naming.lookup("rmi://localhost:2022/filelist");
-        String filePath = server.getFilePath(ficheiro.toString()); ////abre a conecção ao server
-
-        //executa o script
-        ProcessBuilder pb = new ProcessBuilder(path); // proces builder executar comandos
-        Map<String, String> env = pb.environment(); // poder enviar ficheiro para onde está script
-        env.put("file", filePath);
-        File resFile = new File(p.getPedidoId()+".txt"); //ficheiro resultado
-        pb.redirectErrorStream(true);
-        pb.redirectOutput(ProcessBuilder.Redirect.appendTo(resFile));
-        try {
-            pb.start(); //iniciar
-
-            p.setStatusRunning(); // estadomudar
-            //envia o ficheiro para o server
-            p.setStatusSaving();
-            // Creating an OutputStream
-            byte [] mydata=new byte[(int) resFile.length()];
-            FileInputStream in=new FileInputStream(resFile); // peparar ficheiro para enviar para server
-
-            in.read(mydata, 0, mydata.length);
-            in.close();
-
-            server.uploadResFile(mydata,p.getPedidoId()+".txt",(int) resFile.length()); //mandar para o server
-            p.setStatusDone();
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        }
+        p.start();
         return p.getPedidoId();
     }
 
@@ -63,7 +52,6 @@ public class Processor extends UnicastRemoteObject implements ProcessorInterface
         if(!estadoPedido.containsKey(idPedido)) {//se o pedido não existir
             System.out.println("O processo " + idPedido + " não existe");
             return "Z";
-            //cliente vem buscar o estado
         }
 
         return estadoPedido.get(idPedido).getStatus();

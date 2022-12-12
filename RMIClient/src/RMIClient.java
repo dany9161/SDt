@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class RMIClient {
@@ -17,10 +18,16 @@ public class RMIClient {
 
         Thread t = (new Thread() {
             public void run() {
-                RMIProcessor.main(new String[]{"2024"});
-                RMIBalanceador.main(new String[0]);
-                RMIServer.main(new String[0]);
+                try {
+                    //RMIProcessor.main(new String[]{"2024"});
+                    RMIProcessor.main(new String[]{"2025"});
+                    RMIProcessor.main(new String[]{"2026"});
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
+                //RMIBalanceador.main(new String[0]);
+                RMIServer.main(new String[]{"2022"});
             }
         });
         t.start();
@@ -58,21 +65,33 @@ public class RMIClient {
             //submete pedido para o BALANCEADOR
             //recebe o uuid do pedido e url do PROCESSADOR
             File script = new File("script.bat");
-            List<Object> dados = balanceador2023.submetepedido(script.getAbsolutePath(),fileUuid);
-            String urlProcessador = (String) dados.get(0);
-            UUID pedidoId = (UUID) dados.get(1);
-            System.out.println("Consegui por o pedido");
+            String urlProcessador=null;
+            UUID pedidoId=null;
+
+            for (int i =0;i<10;i++) {
+                List<Object> dados = balanceador2023.submetepedido(script.getAbsolutePath(), fileUuid);
+                urlProcessador = (String) dados.get(0);
+                pedidoId = (UUID) dados.get(1);
+
+            }
+            System.out.println("Consegui por os pedidos");
 
             //CLIENTE pergunta pelo pedido ao PROCESSADOR
             //CLIENTE recebe o estado do pedido
             ProcessorInterface processor = (ProcessorInterface) Naming.lookup(urlProcessador);
             System.out.println("Encontrei o processador");
             String status = processor.getEstado(pedidoId);
-
-            System.out.println("Estado do pedido " +pedidoId+ " no servidor " +urlProcessador+" é "+status);
+            while(!Objects.equals(status, "Done")) {
+                System.out.println("Estado do pedido " + pedidoId + " no servidor " + urlProcessador + " é " + status);
+                status = processor.getEstado(pedidoId);
+                Thread.sleep(1000);
+            }
+            System.out.println("Estado do pedido " + pedidoId + " no servidor " + urlProcessador + " é " + status);
 
         } catch(RemoteException e) {
             System.out.println(e.getMessage());
         }catch(Exception e) {e.printStackTrace();}
+
+
     }
 }
