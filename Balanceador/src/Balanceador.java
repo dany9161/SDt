@@ -30,6 +30,24 @@ public class Balanceador extends UnicastRemoteObject implements BalanceadorInter
         return Arrays.asList(processador, pedidoId);
     }
 
+    @Override
+    public void removeProcessor(String url)  {
+        processadores.remove(url);
+        //passar os pedidos para o processador com mais recursos
+        ReplicaManagerInterface r = null;
+        try {
+            r = (ReplicaManagerInterface) Naming.lookup("rmi://localhost:2030/replicaManager");
+
+            List<Pedido> list = r.getProcessorStatus(url);
+            for (Pedido p : list) {
+                submetepedido(p.getScriptPath(), p.getFileUUID());
+            }
+        } catch (NotBoundException | RemoteException | MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+@Override
     public void addProcessador (String address, int pedidos){
         processadores.put(address,pedidos);
     }

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ReplicaServer">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../ReplicaServer/out/production/ReplicaServer" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

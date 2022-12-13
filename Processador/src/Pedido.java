@@ -84,6 +84,10 @@ public class Pedido extends Thread{
 
             server.uploadResFile(mydata,getPedidoId()+".txt",(int) resFile.length());
             setStatusDone();
+            //dizer a replicaManager para eliminar este pedido
+            ReplicaManagerInterface r = (ReplicaManagerInterface) Naming.lookup("rmi://localhost:2030/replicaManager");
+            r.removePedido(pedidoId);
+
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

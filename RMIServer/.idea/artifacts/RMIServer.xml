@@ -2,7 +2,7 @@
   <artifact type="jar" name="RMIServer">
     <output-path>$PROJECT_DIR$/out/artifacts/RMIServer</output-path>
     <root id="archive" name="RMIServer.jar">
-      <element id="module-output" name="RMIServer" />
+      <element id="module-output" name="Server" />
     </root>
   </artifact>
 </component>

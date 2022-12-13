@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.Objects;
 
 public class MulticastReceiver extends Thread {
 
@@ -19,14 +20,17 @@ public class MulticastReceiver extends Thread {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength());
+                if ("end".equals(received)) break;
 
-                if ("end".equals(received)) {
-                    break;
-                }else{
-//rmi://localhost:2024/processor;0
-                    String[] parts = received.split(";");
-                    String address = parts[0];
-                    String nPedidosWating = parts[1];
+//tipoMensagem;rmi://localhost:2024/processor[;0]
+                String[] parts = received.split(";");
+                String tipo = parts[0];
+                String address = parts[1];
+
+                if(Objects.equals(tipo, "setup")){
+                    b.addProcessador(address,0);
+                }else{//update
+                    String nPedidosWating = parts[2];
                     b.updateProcessor(address,Integer.parseInt(nPedidosWating));
                     System.out.println("No processador "+address+" há "+nPedidosWating+ " pedidos à espera");
                 }
