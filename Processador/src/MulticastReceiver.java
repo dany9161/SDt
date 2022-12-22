@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Objects;
 
 public class MulticastReceiver extends Thread {
 
@@ -13,26 +12,27 @@ public class MulticastReceiver extends Thread {
         InetAddress group = null;
         try {
             socket = new MulticastSocket(4446);
-            group = InetAddress.getByName("230.0.0.0");
+            group = InetAddress.getByName("230.0.0.1");
             socket.joinGroup(group);
-            Balanceador b =new Balanceador();
+            Processor p = new Processor();
+
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength());
                 if ("end".equals(received)) break;
 
-//tipoMensagem;rmi://localhost:2024/processor[;0]
+//C heartbeat - h;nP
+//P C morto - m;url
                 String[] parts = received.split(";");
                 String tipo = parts[0];
-                String address = parts[1];
 
-                if(Objects.equals(tipo, "setup")){
-                    b.addProcessador(address,0);
-                }else if(tipo=="update"){//update
-                    String nPedidosWating = parts[2];
-                    b.updateProcessor(address,Integer.parseInt(nPedidosWating));
-                    System.out.println("No processador "+address+" há "+nPedidosWating+ " pedidos à espera");
+                if(tipo == "h"){//mensagem enviada pelo controlador
+                    p.refreshControlador(Integer.parseInt(parts[1]));
+                }else if(tipo == "m"){//mensagem enviada por outro processador
+                    p.avaliaCMorreu();
+                } else if (tipo.equals("c")) {
+                    p.setStorageLeader(parts[5]);
                 }
             }
             socket.leaveGroup(group);

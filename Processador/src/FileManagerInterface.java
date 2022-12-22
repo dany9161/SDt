@@ -6,4 +6,5 @@ public interface FileManagerInterface extends Remote {
     UUID uploadFileToServer(byte[] mybyte, int length) throws RemoteException;
     void uploadResFile(byte[] mybyte, String filename,int length) throws RemoteException;
     String getFilePath(String fileName) throws RemoteException;
+    void voto();
 }

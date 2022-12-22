@@ -10,7 +10,7 @@ public class BalanceadorMain {
 
         try{
             r = LocateRegistry.createRegistry(2023);
-            b = new Balanceador();
+            b = new Balanceador("rmi://localhost:2023/processor");
             r.rebind("balanceador",b);
         }catch(RemoteException a){
             a.printStackTrace();

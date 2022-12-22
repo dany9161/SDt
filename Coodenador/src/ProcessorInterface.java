@@ -11,7 +11,7 @@ public interface ProcessorInterface extends Remote {
     UUID submetePedido(String path, UUID ficheiro) throws RemoteException, MalformedURLException, NotBoundException, FileNotFoundException;
     String getEstado(UUID idPedido) throws RemoteException;
 
-    int getPedidosWaiting();
+
     void setBackUpUrl(String url);
     void setReplicaUrl(String url);
     void setReplicaUrlExtra(String url);
@@ -23,8 +23,4 @@ public interface ProcessorInterface extends Remote {
     void executeReplicaData();
 
     void setReplicaData(List<ReplicaInfo> replicaDataExtra);
-
-    void addPedidoReplica(UUID uuid,String scriptPath,UUID ficheiro,String urlOrigem);
-    void removePedidoReplica(UUID uuid,String urlOrigem);
-
 }

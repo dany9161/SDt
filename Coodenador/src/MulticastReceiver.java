@@ -26,8 +26,10 @@ public class MulticastReceiver extends Thread {
                 String[] parts = received.split(";");
                 String tipo = parts[0];
 
-                if(tipo == "setup"){
+                if (tipo == "setup") {
                     c.addProcessor(parts[1]);
+                }else if(tipo == "b"){
+                    c.sendProcessorList(parts[1]);
                 }else{//update
                     c.updateProcessor(parts[1]);
                 }

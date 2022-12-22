@@ -13,13 +13,25 @@ public class Pedido extends Thread{
     private String scriptPath;
     private UUID fileUUID;
     private UUID pedidoId;
+    String storageLeaderUrl;
 
-    public Pedido(String _scriptPath, UUID _fileUUID,UUID _pedidoId) {
+    private String backUpUrl; // endereço do processador que tem a replica do processador responsavel por este pedido
+    private String processorUrl; // endereço do processador responsavel
+    public Pedido(String _scriptPath, UUID _fileUUID,UUID _pedidoId,String _backUpUrl, String _processorUrl) throws MalformedURLException, NotBoundException, RemoteException {
+        this(_scriptPath,  _fileUUID, _pedidoId, _backUpUrl, _processorUrl,"rmi://localhost:2022/filelist");
+    }
+
+    public Pedido(String _scriptPath, UUID _fileUUID,UUID _pedidoId,String _backUpUrl, String _processorUrl, String _storageLeaderUrl) throws MalformedURLException, NotBoundException, RemoteException {
         scriptPath = _scriptPath;
         fileUUID = _fileUUID;
         pedidoId=_pedidoId;
         //Quando um processo é criado, fica em pending
         status="Waiting";
+        backUpUrl = _backUpUrl;
+        processorUrl=_processorUrl;
+        storageLeaderUrl = _storageLeaderUrl;
+        ProcessorInterface backUpProcessor = (ProcessorInterface) Naming.lookup(backUpUrl);
+        backUpProcessor.addPedidoReplica(pedidoId,scriptPath,fileUUID,processorUrl);
     }
 
     public String getScriptPath() {
@@ -50,6 +62,7 @@ public class Pedido extends Thread{
         //abre a conecção ao server
         FileManagerInterface server = null;
         String filePath;
+        ProcessorInterface backUpProcessor;
         try {
             /*
             try {
@@ -57,7 +70,10 @@ public class Pedido extends Thread{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }*/
-            server = (FileManagerInterface) Naming.lookup("rmi://localhost:2022/filelist");
+
+            backUpProcessor = (ProcessorInterface) Naming.lookup(backUpUrl);
+
+            server = (FileManagerInterface) Naming.lookup(storageLeaderUrl);
             filePath = server.getFilePath(this.fileUUID.toString());
 
             //executa o script
@@ -84,9 +100,7 @@ public class Pedido extends Thread{
 
             server.uploadResFile(mydata,getPedidoId()+".txt",(int) resFile.length());
             setStatusDone();
-            //dizer a replicaManager para eliminar este pedido
-            ReplicaManagerInterface r = (ReplicaManagerInterface) Naming.lookup("rmi://localhost:2030/replicaManager");
-            r.removePedido(pedidoId);
+            backUpProcessor.removePedidoReplica(pedidoId,processorUrl);
 
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             throw new RuntimeException(e);

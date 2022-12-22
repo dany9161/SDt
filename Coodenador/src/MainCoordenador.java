@@ -2,16 +2,15 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class ReplicaServerMain {
+public class MainCoordenador {
     public static void main(String[] args) {
-        int port = Integer.parseInt(args[0]);
         Registry r;
-        ReplicaServer o;
+        Coordenador c;
+
         try{
-            r = LocateRegistry.createRegistry(port);
-            o = new ReplicaServer(port);
-            r.rebind("replicaManager",o);
-            System.out.println("Replica Manager ready");
+            r = LocateRegistry.createRegistry(2021);
+            c = new Coordenador();
+            r.rebind("coordenador",c);
         }catch(RemoteException a){
             a.printStackTrace();
         }catch(Exception e) {

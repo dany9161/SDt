@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface BalanceadorInterface extends Remote {
     List<Object> submetepedido (String filePath, UUID ficheiro) throws RemoteException, MalformedURLException, NotBoundException;
 
-    void removeProcessor(String url);
+    String removeProcessor(String url);
+    String bestProcessor();
     void addProcessador (String address, int pedidos);
+    void receiveProcessorList(List<Processor>processorsList,String controladorUrl);
 }
